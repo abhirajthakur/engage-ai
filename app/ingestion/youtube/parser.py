@@ -1,18 +1,31 @@
+from typing import Any
+
 from pydantic import HttpUrl
 
 from app.models.video import VideoData
+from app.services.engagement import (
+    calculate_engagement_rate,
+)
 
 
-def parse_youtube_data(
+def parse_youtube_video(
+    *,
     url: str,
-    metadata: dict,
+    metadata: dict[str, Any],
     transcript: str,
     video_id: str,
 ) -> VideoData:
-    views = metadata.get("view_count") or 0
-    likes = metadata.get("like_count") or 0
-    comments = metadata.get("comment_count") or 0
-    engagement_rate = ((likes + comments) / views) * 100 if views > 0 else 0
+    """
+    Convert raw yt-dlp metadata
+    into normalized VideoData.
+
+    Returns:
+        VideoData
+    """
+
+    views = metadata.get("view_count")
+    likes = metadata.get("like_count")
+    comments = metadata.get("comment_count")
 
     return VideoData(
         video_id=video_id,
@@ -31,8 +44,9 @@ def parse_youtube_data(
         description=metadata.get("description"),
         thumbnail_url=metadata.get("thumbnail"),
         transcript=transcript,
-        engagement_rate=round(
-            engagement_rate,
-            2,
+        engagement_rate=calculate_engagement_rate(
+            likes=likes,
+            comments=comments,
+            views=views,
         ),
     )

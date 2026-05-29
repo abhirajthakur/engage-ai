@@ -1,10 +1,10 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, HttpUrl
 
 
 class VideoData(BaseModel):
-    video_id: str  # A or B
+    video_id: str
     platform: str
     url: HttpUrl
     title: Optional[str] = None
@@ -17,7 +17,7 @@ class VideoData(BaseModel):
     engagement_rate: Optional[float] = None
     duration: Optional[int] = None
     upload_date: Optional[str] = None
-    hashtags: List[str] = []
+    hashtags: list[str] = []
     description: Optional[str] = None
     thumbnail_url: Optional[str] = None
     transcript: str = ""

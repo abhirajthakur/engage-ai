@@ -16,6 +16,8 @@ def extract_youtube_metadata(
         {
             "quiet": True,
             "skip_download": True,
+            "js_runtimes": {"node": {}},
+            "remote_components": ["ejs:github"],
         }
     ) as ydl:
         info = ydl.extract_info(

@@ -1,6 +1,7 @@
 import re
 
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api._errors import NoTranscriptFound
 
 from app.core.logging import get_logger
 
@@ -13,7 +14,6 @@ def extract_video_id(
     """
     Extract YouTube video ID from URL.
     """
-
     match = re.search(
         r"v=([^&]+)",
         url,
@@ -29,20 +29,35 @@ def get_youtube_transcript(
 ) -> str:
     """
     Fetch transcript from YouTube.
+
+    Strategy:
+    1. Try English transcript
+    2. Fall back to first available transcript
+    3. Raise only if none exist
     """
     video_id = extract_video_id(url)
 
     logger.info(f"Fetching transcript for {video_id}")
 
+    api = YouTubeTranscriptApi()
+
     try:
-        api = YouTubeTranscriptApi()
-        transcript = api.fetch(video_id)
-        transcript_text = " ".join(snippet.text for snippet in transcript)
+        transcript = api.fetch(
+            video_id,
+            languages=["en"],
+        )
+    except NoTranscriptFound:
+        logger.warning("English transcript not found. Trying available transcripts.")
 
-        logger.info(f"Transcript fetched successfully for {video_id}")
+        transcript_list = api.list(video_id)
+        available = list(transcript_list)
+        if not available:
+            raise ValueError(f"No transcripts available for {video_id}")
 
-        return transcript_text
+        transcript = available[0].fetch()
 
-    except Exception as e:
-        logger.exception("Failed to fetch transcript")
-        raise e
+    transcript_text = " ".join(snippet.text for snippet in transcript)
+
+    logger.info(f"Transcript fetched successfully for {video_id}")
+
+    return transcript_text
