@@ -3,9 +3,7 @@ from typing import Any
 from pydantic import HttpUrl
 
 from app.models.video import VideoData
-from app.services.engagement import (
-    calculate_engagement_rate,
-)
+from app.services.engagement import calculate_engagement_rate
 
 
 def parse_youtube_video(
