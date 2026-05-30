@@ -25,7 +25,6 @@ def ingest_youtube_video(
     logger.info(f"Starting YouTube ingestion: {url}")
 
     metadata = extract_youtube_metadata(url)
-
     transcript = get_youtube_transcript(url)
 
     video = parse_youtube_video(
