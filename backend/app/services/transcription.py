@@ -4,11 +4,20 @@ from app.core.logging import get_logger
 
 logger = get_logger(__name__)
 
-model = WhisperModel(
-    "base",
-    device="cpu",
-    compute_type="int8",
-)
+_model = None
+
+
+def get_whisper_model() -> WhisperModel:
+    global _model
+
+    if _model is None:
+        _model = WhisperModel(
+            "base",
+            device="cpu",
+            compute_type="int8",
+        )
+
+    return _model
 
 
 def transcribe_audio(
@@ -25,6 +34,8 @@ def transcribe_audio(
     """
 
     logger.info(f"Transcribing {audio_path}")
+
+    model = get_whisper_model()
 
     segments, info = model.transcribe(
         audio_path,
