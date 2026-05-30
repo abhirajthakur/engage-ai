@@ -1,0 +1,89 @@
+from typing import Any, cast
+
+import chromadb
+from chromadb.api.models.Collection import Collection
+
+from app.core.logging import get_logger
+from app.models.retrieval import SearchResult
+from app.retrieval.vectorstores.base import VectorStore
+
+logger = get_logger(__name__)
+
+
+class ChromaVectorStore(VectorStore):
+    """
+    Chroma implementation.
+    """
+
+    def __init__(
+        self,
+        collection_name: str = "transcripts",
+    ) -> None:
+        self.client = chromadb.PersistentClient(path="storage/chroma")
+        self.collection: Collection = self.client.get_or_create_collection(
+            name=collection_name
+        )
+
+    def add_documents(
+        self,
+        *,
+        ids: list[str],
+        documents: list[str],
+        embeddings: list[list[float]],
+        metadatas: list[dict],
+    ) -> None:
+        self.collection.add(
+            ids=ids,
+            documents=documents,
+            embeddings=cast(Any, embeddings),
+            metadatas=cast(Any, metadatas),
+        )
+
+    def search(
+        self,
+        *,
+        embedding: list[float],
+        top_k: int,
+    ) -> list[SearchResult]:
+
+        results = self.collection.query(
+            query_embeddings=[embedding],
+            n_results=top_k,
+        )
+
+        documents_nested = results.get("documents")
+        metadatas_nested = results.get("metadatas")
+        distances_nested = results.get("distances")
+        ids_nested = results.get("ids")
+
+        if not documents_nested or not metadatas_nested or not ids_nested:
+            return []
+
+        documents = documents_nested[0]
+        metadatas = metadatas_nested[0]
+        ids = ids_nested[0]
+
+        distances = distances_nested[0] if distances_nested else []
+
+        search_results: list[SearchResult] = []
+
+        for idx in range(len(documents)):
+            metadata = metadatas[idx] or {}
+
+            video_id = str(metadata.get("video_id", ""))
+
+            search_results.append(
+                SearchResult(
+                    chunk_id=ids[idx],
+                    video_id=video_id,
+                    text=documents[idx],
+                    score=(float(distances[idx]) if idx < len(distances) else 0.0),
+                )
+            )
+
+        return search_results
+
+    def delete_all(self) -> None:
+        ids = self.collection.get()["ids"]
+        if ids:
+            self.collection.delete(ids=ids)

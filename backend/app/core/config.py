@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     gemini_api_key: str
     groq_api_key: str
 
+    # Vector DB
+    vector_db: str = "chroma"
+
     # Apify
     apify_api_token: str
 
