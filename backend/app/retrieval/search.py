@@ -1,0 +1,27 @@
+from app.models.retrieval import SearchResult
+from app.retrieval.embeddings.bge import embed_text
+from app.retrieval.vectorstores.factory import get_vector_store
+
+
+def search_chunks(
+    query: str,
+    top_k: int = 5,
+) -> list[SearchResult]:
+    """
+    Search transcript chunks.
+
+    Args:
+        query: User query
+        top_k: Number of results
+
+    Returns:
+        list[SearchResult]
+    """
+
+    vector_store = get_vector_store()
+    query_embedding = embed_text(query)
+
+    return vector_store.search(
+        embedding=query_embedding,
+        top_k=top_k,
+    )
