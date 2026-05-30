@@ -1,3 +1,5 @@
+import asyncio
+
 from app.core.logging import get_logger
 from app.ingestion.instagram.extractor import extract_instagram_metadata
 from app.ingestion.instagram.parser import parse_instagram_video
@@ -8,7 +10,7 @@ from app.services.transcription import transcribe_audio
 logger = get_logger(__name__)
 
 
-def ingest_instagram_video(
+async def ingest_instagram_video(
     url: str,
 ) -> VideoData:
     """
@@ -23,18 +25,26 @@ def ingest_instagram_video(
 
     logger.info(f"Starting Instagram ingestion: {url}")
 
-    metadata = extract_instagram_metadata(url)
+    metadata = await asyncio.to_thread(
+        extract_instagram_metadata,
+        url,
+    )
 
     transcript = ""
+
     audio_url = metadata.get("audioUrl")
     external_id = str(metadata.get("id", "unknown"))
 
     if audio_url:
-        audio_path = download_file(
+        audio_path = await download_file(
             url=audio_url,
             output_path=(f"storage/audio/instagram/{external_id}.mp4"),
         )
-        transcript = transcribe_audio(audio_path)
+
+        transcript = await asyncio.to_thread(
+            transcribe_audio,
+            audio_path,
+        )
 
     video = parse_instagram_video(
         url=url,
