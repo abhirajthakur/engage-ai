@@ -7,7 +7,7 @@ from app.models.video import VideoData
 logger = get_logger(__name__)
 
 
-def ingest_youtube_video(
+def ingest_youtube_short(
     url: str,
     video_id: str,
 ) -> VideoData:

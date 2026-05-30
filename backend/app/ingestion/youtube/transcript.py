@@ -1,4 +1,4 @@
-import re
+from urllib.parse import urlparse
 
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import NoTranscriptFound
@@ -8,20 +8,21 @@ from app.core.logging import get_logger
 logger = get_logger(__name__)
 
 
-def extract_video_id(
-    url: str,
-) -> str:
+def extract_shorts_video_id(url: str) -> str:
     """
-    Extract YouTube video ID from URL.
+    Extract YouTube video ID from Shorts URLs.
     """
-    match = re.search(
-        r"v=([^&]+)",
-        url,
-    )
-    if not match:
-        raise ValueError("Invalid YouTube URL")
+    parsed = urlparse(url)
 
-    return match.group(1)
+    if parsed.netloc not in {"youtube.com", "www.youtube.com"}:
+        raise ValueError("Invalid YouTube Shorts URL")
+
+    parts = parsed.path.strip("/").split("/")
+
+    if len(parts) != 2 or parts[0] != "shorts":
+        raise ValueError("Invalid YouTube Shorts URL")
+
+    return parts[1]
 
 
 def get_youtube_transcript(
@@ -35,7 +36,7 @@ def get_youtube_transcript(
     2. Fall back to first available transcript
     3. Raise only if none exist
     """
-    video_id = extract_video_id(url)
+    video_id = extract_shorts_video_id(url)
 
     logger.info(f"Fetching transcript for {video_id}")
 

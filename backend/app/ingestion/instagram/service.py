@@ -8,7 +8,7 @@ from app.services.transcription import transcribe_audio
 logger = get_logger(__name__)
 
 
-def ingest_instagram_video(
+def ingest_instagram_reel(
     url: str,
     video_id: str,
 ) -> VideoData:
