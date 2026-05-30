@@ -9,7 +9,7 @@ class SearchResult(BaseModel):
     regardless of implementation.
     """
     chunk_id: str
-    video_id: str
+    external_id: str
     text: str
     score: float
     source: str | None = None

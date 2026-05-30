@@ -45,7 +45,6 @@ class ChromaVectorStore(VectorStore):
         embedding: list[float],
         top_k: int,
     ) -> list[SearchResult]:
-
         results = self.collection.query(
             query_embeddings=[embedding],
             n_results=top_k,
@@ -54,29 +53,35 @@ class ChromaVectorStore(VectorStore):
         documents_nested = results.get("documents")
         metadatas_nested = results.get("metadatas")
         distances_nested = results.get("distances")
-        ids_nested = results.get("ids")
 
-        if not documents_nested or not metadatas_nested or not ids_nested:
+        if not documents_nested or not metadatas_nested:
             return []
 
         documents = documents_nested[0]
         metadatas = metadatas_nested[0]
-        ids = ids_nested[0]
-
         distances = distances_nested[0] if distances_nested else []
 
         search_results: list[SearchResult] = []
 
-        for idx in range(len(documents)):
-            metadata = metadatas[idx] or {}
-
-            video_id = str(metadata.get("video_id", ""))
+        for idx, document in enumerate(documents):
+            metadata = metadatas[idx] if idx < len(metadatas) else {}
+            metadata = metadata or {}
 
             search_results.append(
                 SearchResult(
-                    chunk_id=ids[idx],
-                    video_id=video_id,
-                    text=documents[idx],
+                    chunk_id=str(
+                        metadata.get(
+                            "chunk_id",
+                            "",
+                        )
+                    ),
+                    external_id=str(
+                        metadata.get(
+                            "external_id",
+                            "",
+                        )
+                    ),
+                    text=document,
                     score=(float(distances[idx]) if idx < len(distances) else 0.0),
                 )
             )

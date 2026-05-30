@@ -7,16 +7,14 @@ from app.models.video import VideoData
 logger = get_logger(__name__)
 
 
-def ingest_youtube_short(
+def ingest_youtube_video(
     url: str,
-    video_id: str,
 ) -> VideoData:
     """
     Complete YouTube ingestion pipeline.
 
     Args:
         url: YouTube URL
-        video_id: A or B
 
     Returns:
         VideoData
@@ -31,7 +29,6 @@ def ingest_youtube_short(
         url=url,
         metadata=metadata,
         transcript=transcript,
-        video_id=video_id,
     )
 
     logger.info(f"Completed ingestion: {video.title}")

@@ -5,14 +5,13 @@ from app.models.chunk import TranscriptChunk
 
 def chunk_transcript(
     transcript: str,
-    video_id: str,
+    external_id: str,
 ) -> list[TranscriptChunk]:
     """
     Split transcript into chunks.
 
     Args:
         transcript: Full transcript
-        video_id: A or B
 
     Returns:
         list[TranscriptChunk]
@@ -27,8 +26,8 @@ def chunk_transcript(
 
     return [
         TranscriptChunk(
-            chunk_id=f"{video_id}_{idx}",
-            video_id=video_id,
+            chunk_id=f"{external_id}_{idx}",
+            external_id=external_id,
             text=text,
         )
         for idx, text in enumerate(chunks)

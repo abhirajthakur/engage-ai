@@ -1,16 +1,12 @@
 from app.core.config import settings
-
 from app.retrieval.vectorstores.base import VectorStore
 from app.retrieval.vectorstores.chroma import ChromaVectorStore
 from app.retrieval.vectorstores.qdrant import QdrantVectorStore
 
-_vector_store = None
+_vector_store: VectorStore | None = None
 
 
 def get_vector_store() -> VectorStore:
-    """
-    Return configured vector store.
-    """
     global _vector_store
 
     if _vector_store is not None:
@@ -18,9 +14,9 @@ def get_vector_store() -> VectorStore:
 
     if settings.vector_db == "qdrant":
         _vector_store = QdrantVectorStore()
-
-        return _vector_store
-
-    _vector_store = ChromaVectorStore()
+    elif settings.vector_db == "chroma":
+        _vector_store = ChromaVectorStore()
+    else:
+        raise ValueError(f"Unsupported vector_db: {settings.vector_db}")
 
     return _vector_store

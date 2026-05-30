@@ -11,7 +11,6 @@ def parse_youtube_video(
     url: str,
     metadata: dict[str, Any],
     transcript: str,
-    video_id: str,
 ) -> VideoData:
     """
     Convert raw yt-dlp metadata
@@ -26,7 +25,7 @@ def parse_youtube_video(
     comments = metadata.get("comment_count")
 
     return VideoData(
-        video_id=video_id,
+        external_id=metadata["id"],
         platform="youtube",
         url=HttpUrl(url),
         title=metadata.get("title"),

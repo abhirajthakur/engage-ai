@@ -4,8 +4,8 @@ from pydantic import BaseModel, HttpUrl
 
 
 class VideoData(BaseModel):
-    video_id: str
-    platform: str
+    external_id: str # original video id from the platform
+    platform: str # e.g. "youtube", "instagram"
     url: HttpUrl
     title: Optional[str] = None
     creator: Optional[str] = None

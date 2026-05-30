@@ -8,16 +8,14 @@ from app.services.transcription import transcribe_audio
 logger = get_logger(__name__)
 
 
-def ingest_instagram_reel(
+def ingest_instagram_video(
     url: str,
-    video_id: str,
 ) -> VideoData:
     """
-    Complete Instagram ingestion pipeline.
+    Complete Instagram Reel ingestion pipeline.
 
     Args:
         url: Reel URL
-        video_id: A or B
 
     Returns:
         VideoData
@@ -26,12 +24,15 @@ def ingest_instagram_reel(
     logger.info(f"Starting Instagram ingestion: {url}")
 
     metadata = extract_instagram_metadata(url)
-    audio_url = metadata.get("audioUrl")
+
     transcript = ""
+    audio_url = metadata.get("audioUrl")
+    external_id = str(metadata.get("id", "unknown"))
 
     if audio_url:
         audio_path = download_file(
-            url=audio_url, output_path=(f"storage/audio/{video_id}.mp4")
+            url=audio_url,
+            output_path=(f"storage/audio/instagram/{external_id}.mp4"),
         )
         transcript = transcribe_audio(audio_path)
 
@@ -39,7 +40,6 @@ def ingest_instagram_reel(
         url=url,
         metadata=metadata,
         transcript=transcript,
-        video_id=video_id,
     )
 
     logger.info(f"Completed Instagram ingestion: {video.creator}")

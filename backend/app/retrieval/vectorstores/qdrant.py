@@ -87,24 +87,9 @@ class QdrantVectorStore(VectorStore):
 
             search_results.append(
                 SearchResult(
-                    chunk_id=str(
-                        payload.get(
-                            "chunk_id",
-                            "",
-                        )
-                    ),
-                    video_id=str(
-                        payload.get(
-                            "video_id",
-                            "",
-                        )
-                    ),
-                    text=str(
-                        payload.get(
-                            "document",
-                            "",
-                        )
-                    ),
+                    chunk_id=str(payload.get("chunk_id", "")),
+                    external_id=str(payload.get("external_id", "")),
+                    text=str(payload.get("document", "")),
                     score=float(point.score),
                 )
             )

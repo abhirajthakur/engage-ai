@@ -11,7 +11,6 @@ def parse_instagram_video(
     url: str,
     metadata: dict[str, Any],
     transcript: str,
-    video_id: str,
 ) -> VideoData:
     """
     Convert raw Instagram data
@@ -28,7 +27,7 @@ def parse_instagram_video(
     comments = metadata.get("commentsCount")
 
     return VideoData(
-        video_id=video_id,
+        external_id=str(metadata.get("id")),
         platform="instagram",
         url=HttpUrl(url),
         title=metadata.get("caption"),
