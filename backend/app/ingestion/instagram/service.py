@@ -31,8 +31,7 @@ def ingest_instagram_reel(
 
     if audio_url:
         audio_path = download_file(
-            url=audio_url,
-            output_path=(f"temp/{video_id}_audio.mp4"),
+            url=audio_url, output_path=(f"storage/audio/{video_id}.mp4")
         )
         transcript = transcribe_audio(audio_path)
 

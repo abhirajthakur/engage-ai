@@ -11,5 +11,5 @@ wheels/
 
 .env
 
-temp/*
-!temp/.gitkeep
+storage/*
+!storage/.gitkeep

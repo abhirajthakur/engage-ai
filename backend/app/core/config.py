@@ -10,7 +10,9 @@ class Settings(BaseSettings):
 
     # LLM
     gemini_api_key: str
+    groq_api_key: str
 
+    # Apify
     apify_api_token: str
 
     # App
