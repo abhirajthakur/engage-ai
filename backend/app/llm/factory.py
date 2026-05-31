@@ -1,7 +1,7 @@
 from langchain_core.runnables import RunnableWithFallbacks
 
 from app.llm.gemini_provider import get_gemini_flash, get_gemini_flash_lite
-from app.llm.groq_provider import get_groq_8b, get_groq_70b
+from app.llm.groq_provider import get_groq_70b
 
 
 def get_llm() -> RunnableWithFallbacks:
@@ -25,12 +25,5 @@ def get_llm() -> RunnableWithFallbacks:
     gemini_flash_lite = get_gemini_flash_lite().with_retry()
 
     groq_70b = get_groq_70b().with_retry()
-    groq_8b = get_groq_8b().with_retry()
 
-    return gemini_flash.with_fallbacks(
-        [
-            gemini_flash_lite,
-            groq_70b,
-            groq_8b,
-        ]
-    )
+    return gemini_flash.with_fallbacks([gemini_flash_lite, groq_70b])
