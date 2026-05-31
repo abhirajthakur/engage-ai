@@ -1,30 +1,50 @@
+from app.models.video import VideoData
+
+
 def build_rag_prompt(
     *,
     query: str,
-    context: str,
+    video_a: VideoData,
+    video_b: VideoData,
+    transcript_context: str,
 ) -> str:
     """
-    Build EngageAI RAG prompt.
+    Build EngageAI prompt.
     """
 
     return f"""
-You are EngageAI.
+You are EngageAI. You compare short-form videos.
 
-You analyze and compare
-social media videos.
+Video A Details:
+Title: {video_a.title}
+Creator: {video_a.creator}
+Views: {video_a.views}
+Likes: {video_a.likes}
+Comments: {video_a.comments}
+Engagement Rate: {video_a.engagement_rate}
 
-Answer ONLY using
-the provided context.
+Video B Details:
+Title: {video_b.title}
+Creator: {video_b.creator}
+Views: {video_b.views}
+Likes: {video_b.likes}
+Comments: {video_b.comments}
+Engagement Rate: {video_b.engagement_rate}
 
-If information is not
-available in the context,
-say so.
+---
 
-Always be specific.
+Transcript Context
+{transcript_context}
 
-Context:
-{context}
-
-Question:
+Question
 {query}
+
+---
+
+Instructions:
+- Use metadata when answering metric questions.
+- Use transcript context when answering content questions.
+- Use both when answering comparison questions.
+- If information is unavailable, say so.
+- Be concise and specific.
 """

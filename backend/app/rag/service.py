@@ -15,11 +15,8 @@ def ask_rag(
     Ask EngageAI.
 
     Args:
-        session_id:
-            Comparison session
-
-        query:
-            User question
+        session_id: Comparison session
+        query: User question
 
     Returns:
         ChatResponse
@@ -33,17 +30,19 @@ def ask_rag(
     results = search_chunks(
         query=query,
         external_ids=[
-            session.video_a_external_id,
-            session.video_b_external_id,
+            session.video_a.external_id,
+            session.video_b.external_id,
         ],
         top_k=10,
     )
 
-    context = build_context(results)
+    transcript_context = build_context(results)
 
     prompt = build_rag_prompt(
         query=query,
-        context=context,
+        video_a=session.video_a,
+        video_b=session.video_b,
+        transcript_context=transcript_context,
     )
 
     llm = get_llm()
@@ -58,7 +57,4 @@ def ask_rag(
         for result in results
     ]
 
-    return ChatResponse(
-        answer=str(response.content),
-        sources=sources,
-    )
+    return ChatResponse(answer=str(response.content), sources=sources)
