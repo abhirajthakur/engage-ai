@@ -1,10 +1,7 @@
 from uuid import uuid4
 
 from qdrant_client import QdrantClient
-
-from qdrant_client.models import Distance
-from qdrant_client.models import PointStruct
-from qdrant_client.models import VectorParams
+from qdrant_client.models import Distance, PointStruct, VectorParams
 
 from app.models.retrieval import SearchResult
 from app.retrieval.vectorstores.base import VectorStore
@@ -73,11 +70,28 @@ class QdrantVectorStore(VectorStore):
         *,
         embedding: list[float],
         top_k: int,
+        external_ids: list[str] | None = None,
     ) -> list[SearchResult]:
+        query_filter = None
+
+        if external_ids:
+            from qdrant_client.models import (
+                FieldCondition,
+                Filter,
+                MatchAny,
+            )
+
+            query_filter = Filter(
+                must=[
+                    FieldCondition(key="external_id", match=MatchAny(any=external_ids))
+                ]
+            )
+
         response = self.client.query_points(
             collection_name=self.COLLECTION_NAME,
             query=embedding,
             limit=top_k,
+            query_filter=query_filter,
         )
 
         search_results: list[SearchResult] = []
@@ -91,6 +105,7 @@ class QdrantVectorStore(VectorStore):
                     external_id=str(payload.get("external_id", "")),
                     text=str(payload.get("document", "")),
                     score=float(point.score),
+                    source=None,
                 )
             )
 

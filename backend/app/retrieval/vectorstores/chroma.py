@@ -44,10 +44,30 @@ class ChromaVectorStore(VectorStore):
         *,
         embedding: list[float],
         top_k: int,
+        external_ids: list[str] | None = None,
     ) -> list[SearchResult]:
+        query_kwargs: dict = {
+            "query_embeddings": [embedding],
+            "n_results": top_k,
+        }
+
+        if external_ids:
+            if len(external_ids) == 1:
+                query_kwargs["where"] = {
+                    "external_id": external_ids[0],
+                }
+            else:
+                query_kwargs["where"] = {
+                    "$or": [
+                        {
+                            "external_id": external_id,
+                        }
+                        for external_id in external_ids
+                    ]
+                }
+
         results = self.collection.query(
-            query_embeddings=[embedding],
-            n_results=top_k,
+            **query_kwargs,
         )
 
         documents_nested = results.get("documents")
@@ -69,20 +89,11 @@ class ChromaVectorStore(VectorStore):
 
             search_results.append(
                 SearchResult(
-                    chunk_id=str(
-                        metadata.get(
-                            "chunk_id",
-                            "",
-                        )
-                    ),
-                    external_id=str(
-                        metadata.get(
-                            "external_id",
-                            "",
-                        )
-                    ),
+                    chunk_id=str(metadata.get("chunk_id", "")),
+                    external_id=str(metadata.get("external_id", "")),
                     text=document,
                     score=(float(distances[idx]) if idx < len(distances) else 0.0),
+                    source=None,
                 )
             )
 

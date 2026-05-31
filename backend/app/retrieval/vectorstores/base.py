@@ -25,6 +25,7 @@ class VectorStore(ABC):
         *,
         embedding: list[float],
         top_k: int,
+        external_ids: list[str] | None = None,
     ) -> list[SearchResult]:
         pass
 
