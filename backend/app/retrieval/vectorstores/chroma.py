@@ -93,7 +93,6 @@ class ChromaVectorStore(VectorStore):
                     external_id=str(metadata.get("external_id", "")),
                     text=document,
                     score=(float(distances[idx]) if idx < len(distances) else 0.0),
-                    source=None,
                 )
             )
 

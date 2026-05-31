@@ -105,7 +105,6 @@ class QdrantVectorStore(VectorStore):
                     external_id=str(payload.get("external_id", "")),
                     text=str(payload.get("document", "")),
                     score=float(point.score),
-                    source=None,
                 )
             )
 

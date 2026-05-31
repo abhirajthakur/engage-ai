@@ -12,4 +12,3 @@ class SearchResult(BaseModel):
     external_id: str
     text: str
     score: float
-    source: str | None = None
