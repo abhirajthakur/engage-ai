@@ -5,6 +5,7 @@ from app.retrieval.vectorstores.factory import get_vector_store
 
 def search_chunks(
     query: str,
+    external_ids: list[str] | None = None,
     top_k: int = 5,
 ) -> list[SearchResult]:
     """
@@ -12,6 +13,7 @@ def search_chunks(
 
     Args:
         query: User query
+        external_ids: Optional list of external IDs to filter the search
         top_k: Number of results
 
     Returns:
@@ -24,4 +26,5 @@ def search_chunks(
     return vector_store.search(
         embedding=query_embedding,
         top_k=top_k,
+        external_ids=external_ids,
     )
