@@ -1,5 +1,5 @@
-from app.chunking.splitter import chunk_transcript
 from app.models.video import VideoData
+from app.retrieval.chunking import chunk_transcript
 from app.retrieval.embeddings.bge import embed_text
 from app.retrieval.vectorstores.factory import get_vector_store
 
@@ -34,7 +34,7 @@ def index_video(
             {
                 "chunk_id": chunk.chunk_id,
                 "external_id": chunk.external_id,
-                "platform": video.platform
+                "platform": video.platform,
             }
         )
 

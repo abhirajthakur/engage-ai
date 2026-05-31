@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -19,29 +21,22 @@ def validate_youtube_short(
 
 
 @router.post("/ingest")
-def ingest_videos(
-    request: IngestRequest,
-):
+async def ingest_videos(request: IngestRequest):
     """
     Ingest YouTube and Instagram videos.
     """
 
     if not validate_youtube_short(request.youtube_url):
         raise HTTPException(
-            status_code=400, detail=("Please provide a YouTube Shorts URL")
+            status_code=400, detail="Please provide a YouTube Shorts URL"
         )
 
-    video_a = ingest_youtube_short(
-        url=request.youtube_url,
-        video_id="A",
-    )
-
-    video_b = ingest_instagram_reel(
-        url=request.instagram_url,
-        video_id="B",
+    video_a, video_b = await asyncio.gather(
+        ingest_youtube_short(url=request.youtube_url),
+        ingest_instagram_reel(url=request.instagram_url),
     )
 
     return {
-        "video_a": (video_a.model_dump()),
-        "video_b": (video_b.model_dump()),
+        "video_a": video_a.model_dump(),
+        "video_b": video_b.model_dump(),
     }
