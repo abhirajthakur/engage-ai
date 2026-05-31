@@ -1,28 +1,12 @@
-from urllib.parse import urlparse
-
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import NoTranscriptFound
 
+from app.cache.factory import get_cache
+from app.cache.keys import transcript_key
 from app.core.logging import get_logger
+from app.ingestion.youtube.utils import extract_shorts_video_id
 
 logger = get_logger(__name__)
-
-
-def extract_shorts_video_id(url: str) -> str:
-    """
-    Extract YouTube video ID from Shorts URLs.
-    """
-    parsed = urlparse(url)
-
-    if parsed.netloc not in {"youtube.com", "www.youtube.com"}:
-        raise ValueError("Invalid YouTube Shorts URL")
-
-    parts = parsed.path.strip("/").split("/")
-
-    if len(parts) != 2 or parts[0] != "shorts":
-        raise ValueError("Invalid YouTube Shorts URL")
-
-    return parts[1]
 
 
 def get_youtube_transcript(
@@ -37,6 +21,19 @@ def get_youtube_transcript(
     3. Raise only if none exist
     """
     video_id = extract_shorts_video_id(url)
+
+    cache = get_cache()
+
+    key = transcript_key(
+        platform="youtube",
+        external_id=video_id,
+    )
+
+    cached = cache.get(key)
+
+    if cached is not None:
+        logger.info(f"Transcript cache hit: {video_id}")
+        return cached
 
     logger.info(f"Fetching transcript for {video_id}")
 
@@ -58,6 +55,8 @@ def get_youtube_transcript(
         transcript = available[0].fetch()
 
     transcript_text = " ".join(snippet.text for snippet in transcript)
+
+    cache.set(key, transcript_text)
 
     logger.info(f"Transcript fetched successfully for {video_id}")
 

@@ -1,3 +1,7 @@
+import json
+from app.cache.factory import get_cache
+from app.cache.keys import metadata_key
+from app.ingestion.instagram.utils import extract_reel_id
 from typing import Any
 
 from apify_client import ApifyClient
@@ -16,6 +20,16 @@ def extract_instagram_metadata(
     """
 
     logger.info(f"Extracting Instagram data: {url}")
+
+    cache = get_cache()
+
+    reel_id = extract_reel_id(url)
+    cache_key = metadata_key(platform="instagram", external_id=reel_id)
+
+    cached = cache.get(cache_key)
+    if cached is not None:
+        logger.info("Instagram metadata cache hit")
+        return json.loads(cached)
 
     client = ApifyClient(settings.apify_api_token)
     actor = client.actor("apify/instagram-scraper")
@@ -36,4 +50,8 @@ def extract_instagram_metadata(
     if not dataset_items:
         raise ValueError("No Instagram data returned")
 
-    return dataset_items[0]
+    metadata = dataset_items[0]
+
+    cache.set(cache_key, json.dumps(metadata))
+
+    return metadata

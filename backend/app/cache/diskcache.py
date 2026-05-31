@@ -15,9 +15,7 @@ class DiskCacheProvider(CacheProvider):
         self,
         key: str,
     ) -> str | None:
-        return self.cache.get(
-            key,
-        )
+        return self.cache.get(key)
 
     def set(
         self,
