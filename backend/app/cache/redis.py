@@ -1,12 +1,18 @@
 from app.cache.base import CacheProvider
+from app.core.redis import get_redis
 
 
 class RedisCacheProvider(CacheProvider):
+    def __init__(self):
+        self.client = get_redis()
+
     def get(
         self,
         key: str,
     ) -> str | None:
-        raise NotImplementedError
+        value = self.client.get(key)
+
+        return str(value) if value is not None else None
 
     def set(
         self,
@@ -14,10 +20,10 @@ class RedisCacheProvider(CacheProvider):
         value: str,
         ttl_seconds: int | None = None,
     ) -> None:
-        raise NotImplementedError
+        self.client.set(key, value, ex=ttl_seconds)
 
     def delete(
         self,
         key: str,
     ) -> None:
-        raise NotImplementedError
+        self.client.delete(key)

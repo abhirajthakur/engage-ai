@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     # Apify
     apify_api_token: str
 
+    # Redis
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+
+    # Cache
+    session_ttl_seconds: int = 60 * 60 * 24
+
     # App
     log_level: str = "INFO"
     environment: str = "development"

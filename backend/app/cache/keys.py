@@ -37,3 +37,15 @@ def embedding_key(text: str) -> str:
     ).hexdigest()
 
     return f"embedding:{digest}"
+
+
+def session_cache_key(
+    session_id: str,
+) -> str:
+    return f"session:{session_id}"
+
+
+def conversation_cache_key(
+    session_id: str,
+) -> str:
+    return f"conversation:{session_id}"
