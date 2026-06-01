@@ -9,9 +9,7 @@ from app.models.video import VideoData
 logger = get_logger(__name__)
 
 
-async def ingest_youtube_video(
-    url: str,
-) -> VideoData:
+async def ingest_youtube_short(url: str) -> VideoData:
     """
     Complete YouTube ingestion pipeline.
 

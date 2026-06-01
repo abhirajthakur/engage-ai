@@ -12,9 +12,7 @@ from app.services.transcription import transcribe_audio
 logger = get_logger(__name__)
 
 
-async def ingest_instagram_video(
-    url: str,
-) -> VideoData:
+async def ingest_instagram_reel(url: str) -> VideoData:
     """
     Complete Instagram Reel ingestion pipeline.
 

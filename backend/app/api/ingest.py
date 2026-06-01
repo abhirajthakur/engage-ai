@@ -1,42 +1,38 @@
 import asyncio
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 
 from app.ingestion.instagram.service import ingest_instagram_reel
 from app.ingestion.youtube.service import ingest_youtube_short
+from app.schemas.ingest import IngestRequest, IngestResponse
+from app.session.service import create_session
 
 router = APIRouter()
 
 
-class IngestRequest(BaseModel):
-    youtube_url: str
-    instagram_url: str
-
-
-def validate_youtube_short(
-    url: str,
-) -> bool:
-    return "youtube.com/shorts/" in url
-
-
-@router.post("/ingest")
+@router.post("/ingest", response_model=IngestResponse)
 async def ingest_videos(request: IngestRequest):
     """
-    Ingest YouTube and Instagram videos.
+    Ingest one YouTube Short and one Instagram Reel concurrently.
     """
-
-    if not validate_youtube_short(request.youtube_url):
-        raise HTTPException(
-            status_code=400, detail="Please provide a YouTube Shorts URL"
+    try:
+        video_a, video_b = await asyncio.gather(
+            ingest_youtube_short(url=request.youtube_url),
+            ingest_instagram_reel(url=request.instagram_url),
         )
 
-    video_a, video_b = await asyncio.gather(
-        ingest_youtube_short(url=request.youtube_url),
-        ingest_instagram_reel(url=request.instagram_url),
-    )
+        session = create_session(
+            video_a=video_a,
+            video_b=video_b,
+        )
 
-    return {
-        "video_a": video_a.model_dump(),
-        "video_b": video_b.model_dump(),
-    }
+        return IngestResponse(
+            session_id=session.session_id,
+            video_a=video_a,
+            video_b=video_b,
+        )
+
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ingestion failed: {str(e)}")
