@@ -1,12 +1,13 @@
 from app.models.video import VideoData
 
 
-def build_rag_prompt(
+def build_prompt(
     *,
     query: str,
     video_a: VideoData,
     video_b: VideoData,
     transcript_context: str,
+    conversation_history: str,
 ) -> str:
     """
     Build EngageAI prompt.
@@ -35,6 +36,9 @@ Engagement Rate: {video_b.engagement_rate}
 
 Transcript Context
 {transcript_context}
+
+Conversation History
+{conversation_history}
 
 Question
 {query}

@@ -2,11 +2,14 @@ import asyncio
 
 from fastapi import APIRouter, HTTPException
 
+from app.core.logging import get_logger
 from app.ingestion.instagram.service import ingest_instagram_reel
 from app.ingestion.youtube.service import ingest_youtube_short
 from app.retrieval.indexing import index_video
 from app.schemas.ingest import IngestRequest, IngestResponse
 from app.session.service import create_session
+
+logger = get_logger(__name__)
 
 router = APIRouter()
 
@@ -39,6 +42,11 @@ async def ingest_videos(request: IngestRequest):
         )
 
     except ValueError as e:
+        logger.warning(f"Ingestion validation error: {str(e)}")
         raise HTTPException(status_code=422, detail=str(e))
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ingestion failed: {str(e)}")
+        logger.error(f"Ingestion error: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Ingestion failed: {str(e)}"
+        ) from e

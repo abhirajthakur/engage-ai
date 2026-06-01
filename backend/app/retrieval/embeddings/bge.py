@@ -1,15 +1,6 @@
-from app.core.logging import get_logger
-import json
-
 from sentence_transformers import SentenceTransformer
 
-from app.cache.factory import get_cache
-from app.cache.keys import embedding_key
-
-_model = None
-
-
-logger = get_logger(__name__)
+_model: SentenceTransformer | None = None
 
 
 def get_embedding_model() -> SentenceTransformer:
@@ -24,18 +15,6 @@ def get_embedding_model() -> SentenceTransformer:
 def embed_text(
     text: str,
 ) -> list[float]:
-
-    cache = get_cache()
-    key = embedding_key(text)
-
-    cached = cache.get(
-        key,
-    )
-
-    if cached is not None:
-        logger.info("Embedding cache hit")
-        return json.loads(cached)
-
     model = get_embedding_model()
 
     embedding = model.encode(
@@ -44,13 +23,27 @@ def embed_text(
         convert_to_numpy=True,
     )
 
-    embedding_list = embedding.tolist()
+    return embedding.tolist()
 
-    cache.set(
-        key,
-        json.dumps(
-            embedding_list,
-        ),
+
+def embed_texts(
+    texts: list[str],
+) -> list[list[float]]:
+    """
+    Batch embedding generation.
+    """
+
+    if not texts:
+        return []
+
+    model = get_embedding_model()
+
+    embeddings = model.encode(
+        texts,
+        batch_size=32,
+        normalize_embeddings=True,
+        convert_to_numpy=True,
+        show_progress_bar=False,
     )
 
-    return embedding_list
+    return embeddings.tolist()

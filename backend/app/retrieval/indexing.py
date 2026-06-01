@@ -1,6 +1,6 @@
 from app.models.video import VideoData
 from app.retrieval.chunking import chunk_transcript
-from app.retrieval.embeddings.bge import embed_text
+from app.retrieval.embeddings.bge import embed_texts
 from app.retrieval.vectorstores.factory import get_vector_store
 
 
@@ -21,22 +21,22 @@ def index_video(
         external_id=video.external_id,
     )
 
-    ids: list[str] = []
-    documents: list[str] = []
-    embeddings: list[list[float]] = []
-    metadatas: list[dict] = []
+    if not chunks:
+        return
 
-    for chunk in chunks:
-        ids.append(chunk.chunk_id)
-        documents.append(chunk.text)
-        embeddings.append(embed_text(chunk.text))
-        metadatas.append(
-            {
-                "chunk_id": chunk.chunk_id,
-                "external_id": chunk.external_id,
-                "platform": video.platform,
-            }
-        )
+    ids = [chunk.chunk_id for chunk in chunks]
+    documents = [chunk.text for chunk in chunks]
+
+    embeddings = embed_texts(documents)
+
+    metadatas = [
+        {
+            "chunk_id": chunk.chunk_id,
+            "external_id": chunk.external_id,
+            "platform": video.platform,
+        }
+        for chunk in chunks
+    ]
 
     vector_store.add_documents(
         ids=ids,

@@ -7,11 +7,6 @@ class SourceCitation(BaseModel):
     text: str
 
 
-class ChatRequest(BaseModel):
-    session_id: str
-    message: str
-
-
-class ChatResponse(BaseModel):
+class ChatResult(BaseModel):
     answer: str
     sources: list[SourceCitation]
