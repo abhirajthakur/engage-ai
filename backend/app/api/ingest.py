@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.ingestion.instagram.service import ingest_instagram_reel
 from app.ingestion.youtube.service import ingest_youtube_short
+from app.retrieval.indexing import index_video
 from app.schemas.ingest import IngestRequest, IngestResponse
 from app.session.service import create_session
 
@@ -19,6 +20,11 @@ async def ingest_videos(request: IngestRequest):
         video_a, video_b = await asyncio.gather(
             ingest_youtube_short(url=request.youtube_url),
             ingest_instagram_reel(url=request.instagram_url),
+        )
+
+        await asyncio.gather(
+            asyncio.to_thread(index_video, video_a),
+            asyncio.to_thread(index_video, video_b),
         )
 
         session = create_session(

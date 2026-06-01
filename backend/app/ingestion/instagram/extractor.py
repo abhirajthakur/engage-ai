@@ -1,13 +1,13 @@
 import json
-from app.cache.factory import get_cache
-from app.cache.keys import metadata_key
-from app.ingestion.instagram.utils import extract_reel_id
 from typing import Any
 
 from apify_client import ApifyClient
 
+from app.cache.factory import get_cache
+from app.cache.keys import metadata_cache_key
 from app.core.config import settings
 from app.core.logging import get_logger
+from app.ingestion.instagram.utils import extract_reel_id
 
 logger = get_logger(__name__)
 
@@ -24,7 +24,7 @@ def extract_instagram_metadata(
     cache = get_cache()
 
     reel_id = extract_reel_id(url)
-    cache_key = metadata_key(platform="instagram", external_id=reel_id)
+    cache_key = metadata_cache_key(platform="instagram", external_id=reel_id)
 
     cached = cache.get(cache_key)
     if cached is not None:

@@ -1,7 +1,7 @@
-from app.cache.keys import transcript_key
-from app.cache.factory import get_cache
 import asyncio
 
+from app.cache.factory import get_cache
+from app.cache.keys import transcript_cache_key
 from app.core.logging import get_logger
 from app.ingestion.instagram.extractor import extract_instagram_metadata
 from app.ingestion.instagram.parser import parse_instagram_video
@@ -37,12 +37,12 @@ async def ingest_instagram_reel(url: str) -> VideoData:
 
     cache = get_cache()
 
-    transcript_cache_key = transcript_key(
+    cache_key = transcript_cache_key(
         platform="instagram",
         external_id=external_id,
     )
 
-    cached_transcript = cache.get(transcript_cache_key)
+    cached_transcript = cache.get(cache_key)
 
     if cached_transcript is not None:
         logger.info(f"Instagram transcript cache hit: {external_id}")
@@ -58,7 +58,7 @@ async def ingest_instagram_reel(url: str) -> VideoData:
             audio_path,
         )
 
-        cache.set(transcript_cache_key, transcript)
+        cache.set(cache_key, transcript)
 
     video = parse_instagram_video(
         url=url,

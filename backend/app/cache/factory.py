@@ -10,9 +10,11 @@ def get_cache() -> CacheProvider:
     global _cache
 
     if _cache is None:
-        if settings.environment == "production":
+        if settings.cache_provider == "redis":
             _cache = RedisCacheProvider()
-        else:
+        elif settings.cache_provider == "disk":
             _cache = DiskCacheProvider()
+        else:
+            raise ValueError(f"Unsupported cache provider: {settings.cache_provider}")
 
     return _cache

@@ -4,7 +4,7 @@ from typing import Any
 import yt_dlp
 
 from app.cache.factory import get_cache
-from app.cache.keys import metadata_key
+from app.cache.keys import metadata_cache_key
 from app.core.logging import get_logger
 from app.ingestion.youtube.utils import extract_shorts_video_id
 
@@ -19,7 +19,7 @@ def extract_youtube_metadata(
     video_id = extract_shorts_video_id(url)
 
     cache = get_cache()
-    key = metadata_key(
+    key = metadata_cache_key(
         platform="youtube",
         external_id=video_id,
     )

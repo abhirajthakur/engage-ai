@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     redis_port: int = 6379
 
     # Cache
+    cache_provider: str = "disk"
     session_ttl_seconds: int = 60 * 60 * 24
 
     # App
