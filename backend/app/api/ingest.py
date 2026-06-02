@@ -25,10 +25,8 @@ async def ingest_videos(request: IngestRequest):
             ingest_instagram_reel(url=request.instagram_url),
         )
 
-        await asyncio.gather(
-            asyncio.to_thread(index_video, video_a),
-            asyncio.to_thread(index_video, video_b),
-        )
+        index_video(video_a)
+        index_video(video_b)
 
         session = create_session(
             video_a=video_a,

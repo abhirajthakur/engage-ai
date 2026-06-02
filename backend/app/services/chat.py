@@ -1,9 +1,55 @@
 from collections.abc import AsyncGenerator
+from dataclasses import dataclass
 
 from app.graph.service import run_graph
 from app.llm.factory import get_llm
 from app.models.chat import ChatResult, SourceCitation
+from app.schemas.chat import (
+    DoneEvent,
+    ErrorEvent,
+    SourceCitationSchema,
+    SourcesEvent,
+    TokenEvent,
+)
+from app.services.sse import sse
 from app.session.memory import add_message
+
+
+@dataclass
+class PreparedChat:
+    prompt: str
+    sources: list[SourceCitation]
+
+
+def _prepare_chat(
+    *,
+    session_id: str,
+    message: str,
+) -> PreparedChat:
+    """
+    Shared chat preparation logic.
+
+    Runs graph and builds citations.
+    """
+
+    state = run_graph(
+        session_id=session_id,
+        query=message,
+    )
+
+    sources = [
+        SourceCitation(
+            external_id=chunk.external_id,
+            chunk_id=chunk.chunk_id,
+            text=chunk.text,
+        )
+        for chunk in state.retrieved_chunks
+    ]
+
+    return PreparedChat(
+        prompt=state.prompt,
+        sources=sources,
+    )
 
 
 def chat(
@@ -11,15 +57,13 @@ def chat(
     session_id: str,
     message: str,
 ) -> ChatResult:
-    state = run_graph(
+    prepared = _prepare_chat(
         session_id=session_id,
-        query=message,
+        message=message,
     )
 
     llm = get_llm()
-
-    response = llm.invoke(state.prompt)
-
+    response = llm.invoke(prepared.prompt)
     answer = str(response.content)
 
     add_message(
@@ -36,14 +80,7 @@ def chat(
 
     return ChatResult(
         answer=answer,
-        sources=[
-            SourceCitation(
-                external_id=chunk.external_id,
-                chunk_id=chunk.chunk_id,
-                text=chunk.text,
-            )
-            for chunk in state.retrieved_chunks
-        ],
+        sources=prepared.sources,
     )
 
 
@@ -52,33 +89,53 @@ async def stream_chat(
     session_id: str,
     message: str,
 ) -> AsyncGenerator[str, None]:
-    state = run_graph(
-        session_id=session_id,
-        query=message,
-    )
+    try:
+        prepared = _prepare_chat(
+            session_id=session_id,
+            message=message,
+        )
 
-    llm = get_llm()
-    chunks: list[str] = []
+        llm = get_llm()
 
-    async for chunk in llm.astream(state.prompt):
-        content = str(chunk.content)
-        if not content:
-            continue
+        chunks: list[str] = []
 
-        chunks.append(content)
+        async for chunk in llm.astream(prepared.prompt):
+            content = str(chunk.content)
+            if not content:
+                continue
 
-        yield content
+            chunks.append(content)
 
-    answer = "".join(chunks)
+            yield sse(TokenEvent(content=content))
 
-    add_message(
-        session_id=session_id,
-        role="user",
-        content=message,
-    )
+        yield sse(
+            SourcesEvent(
+                sources=[
+                    SourceCitationSchema(
+                        external_id=source.external_id,
+                        chunk_id=source.chunk_id,
+                        text=source.text,
+                    )
+                    for source in prepared.sources
+                ]
+            )
+        )
 
-    add_message(
-        session_id=session_id,
-        role="assistant",
-        content=answer,
-    )
+        answer = "".join(chunks)
+
+        add_message(
+            session_id=session_id,
+            role="user",
+            content=message,
+        )
+
+        add_message(
+            session_id=session_id,
+            role="assistant",
+            content=answer,
+        )
+
+        yield sse(DoneEvent())
+
+    except Exception:
+        yield sse(ErrorEvent(message="Internal server error"))

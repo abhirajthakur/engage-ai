@@ -1,3 +1,6 @@
+from typing import Literal
+
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,6 +14,9 @@ class Settings(BaseSettings):
     # LLM
     gemini_api_key: str
     groq_api_key: str
+
+    # Hugging Face Hub (for embeddings)
+    hf_token: str | None = None
 
     # Vector DB
     vector_db: str = "chroma"
@@ -28,8 +34,14 @@ class Settings(BaseSettings):
 
     # App
     log_level: str = "INFO"
-    environment: str = "development"
+    environment: Literal["development", "staging", "production"] = "development"
     api_prefix: str = "/api"
+    cors_origins: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]
+    )
 
 
 settings = Settings()  # ty:ignore[missing-argument]

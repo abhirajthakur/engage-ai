@@ -16,8 +16,21 @@ def index_video(
 
     vector_store = get_vector_store()
 
+    searchable_text = "\n\n".join(
+        [
+            f"Title: {video.title}",
+            f"Description: {video.description}",
+            f"Creator: {video.creator}",
+            f"Views: {video.views}",
+            f"Likes: {video.likes}",
+            f"Comments: {video.comments}",
+            "",
+            video.transcript,
+        ]
+    )
+
     chunks = chunk_transcript(
-        transcript=video.transcript,
+        transcript=searchable_text,
         external_id=video.external_id,
     )
 
@@ -34,6 +47,8 @@ def index_video(
             "chunk_id": chunk.chunk_id,
             "external_id": chunk.external_id,
             "platform": video.platform,
+            "title": video.title,
+            "creator": video.creator,
         }
         for chunk in chunks
     ]

@@ -1,3 +1,4 @@
+from app.core.config import settings
 from sentence_transformers import SentenceTransformer
 
 _model: SentenceTransformer | None = None
@@ -7,7 +8,11 @@ def get_embedding_model() -> SentenceTransformer:
     global _model
 
     if _model is None:
-        _model = SentenceTransformer("BAAI/bge-small-en-v1.5", device="cpu")
+        _model = SentenceTransformer(
+            "BAAI/bge-small-en-v1.5",
+            device="cpu",
+            token=settings.hf_token,
+        )
 
     return _model
 
