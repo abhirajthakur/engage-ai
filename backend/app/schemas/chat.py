@@ -7,6 +7,9 @@ class SourceCitationSchema(BaseModel):
     external_id: str
     chunk_id: str
     text: str
+    platform: str
+    title: str
+    creator: str
 
 
 class ChatRequest(BaseModel):

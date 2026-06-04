@@ -42,6 +42,9 @@ def _prepare_chat(
             external_id=chunk.external_id,
             chunk_id=chunk.chunk_id,
             text=chunk.text,
+            platform=chunk.platform or "",
+            title=chunk.title or "",
+            creator=chunk.creator or "",
         )
         for chunk in state.retrieved_chunks
     ]
@@ -115,6 +118,9 @@ async def stream_chat(
                         external_id=source.external_id,
                         chunk_id=source.chunk_id,
                         text=source.text,
+                        platform=source.platform,
+                        title=source.title,
+                        creator=source.creator,
                     )
                     for source in prepared.sources
                 ]

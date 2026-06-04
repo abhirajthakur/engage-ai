@@ -10,5 +10,8 @@ class SearchResult(BaseModel):
     """
     chunk_id: str
     external_id: str
+    platform: str | None = None
+    title: str | None = None
+    creator: str | None = None 
     text: str
     score: float

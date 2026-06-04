@@ -103,6 +103,9 @@ class QdrantVectorStore(VectorStore):
                 SearchResult(
                     chunk_id=str(payload.get("chunk_id", "")),
                     external_id=str(payload.get("external_id", "")),
+                    platform=str(payload.get("platform", "")),
+                    title=str(payload.get("title", "")),
+                    creator=str(payload.get("creator", "")),
                     text=str(payload.get("document", "")),
                     score=float(point.score),
                 )

@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 @router.post("/chat", response_model=ChatResponse)
-def chat_endpoint(request: ChatRequest) -> ChatResponse:
+def chat_endpoint(request: ChatRequest):
     try:
         result = chat(
             session_id=request.session_id,
@@ -30,6 +30,9 @@ def chat_endpoint(request: ChatRequest) -> ChatResponse:
                     external_id=source.external_id,
                     chunk_id=source.chunk_id,
                     text=source.text,
+                    platform=source.platform,
+                    title=source.title,
+                    creator=source.creator,
                 )
                 for source in result.sources
             ],
@@ -48,7 +51,7 @@ def chat_endpoint(request: ChatRequest) -> ChatResponse:
 
 
 @router.post("/chat/stream")
-async def stream_chat_endpoint(request: ChatRequest) -> StreamingResponse:
+async def stream_chat_endpoint(request: ChatRequest):
     try:
         session = get_session(request.session_id)
 

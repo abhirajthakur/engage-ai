@@ -91,6 +91,9 @@ class ChromaVectorStore(VectorStore):
                 SearchResult(
                     chunk_id=str(metadata.get("chunk_id", "")),
                     external_id=str(metadata.get("external_id", "")),
+                    platform=str(metadata.get("platform", "")),
+                    title=str(metadata.get("title", "")),
+                    creator=str(metadata.get("creator", "")),
                     text=document,
                     score=(float(distances[idx]) if idx < len(distances) else 0.0),
                 )
