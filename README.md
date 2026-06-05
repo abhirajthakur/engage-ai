@@ -2,6 +2,10 @@
 
 AI powered creator intelligence platform that compares a YouTube Short and an Instagram Reel, retrieves the most relevant content from both videos, and generates actionable insights using Retrieval Augmented Generation and LangGraph.
 
+## Demo
+
+https://github.com/user-attachments/assets/d6aae368-8711-49b4-90fd-216ef0f326ee
+
 ## Features
 
 - Compare a YouTube Short against an Instagram Reel
